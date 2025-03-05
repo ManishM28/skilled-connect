@@ -8,6 +8,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CategoriesPage from "./pages/Categories";
+import AboutUs from "./pages/AboutUs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -21,9 +24,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/categories/:categoryId" element={<CategoriesPage />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Chatbot />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

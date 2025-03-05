@@ -9,6 +9,7 @@ type Profile = {
   first_name: string | null;
   last_name: string | null;
   avatar_url: string | null;
+  phone: string | null;
   is_professional: boolean;
 }
 
@@ -17,7 +18,7 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  signUp: (email: string, password: string, firstName: string, lastName: string, phone?: string, isProfessional?: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
   isProfessional: boolean;
@@ -129,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Sign up with email and password
-  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+  const signUp = async (email: string, password: string, firstName: string, lastName: string, phone?: string, isProfessional = false) => {
     try {
       setLoading(true);
       
@@ -140,16 +141,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data: {
             first_name: firstName,
             last_name: lastName,
+            phone: phone || null,
+            is_professional: isProfessional,
           },
         },
       });
 
       if (error) throw error;
       
-      toast({
-        title: "Registration successful",
-        description: "Please check your email to confirm your account.",
-      });
+      // If user is a professional, create a record in the professionals table
+      if (isProfessional) {
+        // This will be handled by a trigger after the user confirms their email
+        toast({
+          title: "Registration successful",
+          description: "Please check your email to confirm your account. After confirmation, you'll be ready to offer your services!",
+        });
+      } else {
+        toast({
+          title: "Registration successful",
+          description: "Please check your email to confirm your account.",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error signing up",

@@ -24,7 +24,7 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) =>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Welcome to SkilledConnect</DialogTitle>
+          <DialogTitle>Welcome to Skill Links</DialogTitle>
           <DialogDescription>
             Connect with skilled professionals or offer your services.
           </DialogDescription>

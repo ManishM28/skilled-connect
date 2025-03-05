@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface SignUpFormProps {
   onSuccess?: () => void;
@@ -15,11 +16,13 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [userType, setUserType] = useState<'customer' | 'labor'>('customer');
   const { signUp, loading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signUp(email, password, firstName, lastName);
+    await signUp(email, password, firstName, lastName, phone, userType === 'labor');
     if (onSuccess) onSuccess();
   };
 
@@ -62,6 +65,18 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
           required
         />
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="phone">Phone Number</Label>
+        <Input
+          id="phone"
+          type="tel"
+          placeholder="+1234567890"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+        />
+      </div>
       
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
@@ -77,6 +92,24 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
         <p className="text-xs text-muted-foreground">
           Password must be at least 6 characters long
         </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label>I am a</Label>
+        <RadioGroup 
+          value={userType} 
+          onValueChange={(value) => setUserType(value as 'customer' | 'labor')}
+          className="flex space-x-4"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="customer" id="customer" />
+            <Label htmlFor="customer">Customer</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="labor" id="labor" />
+            <Label htmlFor="labor">Service Provider</Label>
+          </div>
+        </RadioGroup>
       </div>
       
       <Button type="submit" className="w-full" disabled={loading}>
