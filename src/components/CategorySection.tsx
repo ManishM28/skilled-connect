@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { categories } from '@/data/categories';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -21,32 +22,33 @@ const CategorySection = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {categories.map((category) => (
-            <motion.div
-              key={category.id}
-              className={cn(
-                "relative overflow-hidden rounded-2xl hover-lift group cursor-pointer",
-                "bg-card border border-border/40 p-6 min-h-[180px] flex flex-col",
-                hoveredCategory === category.id ? "ring-2 ring-primary/50" : ""
-              )}
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              onMouseEnter={() => setHoveredCategory(category.id)}
-              onMouseLeave={() => setHoveredCategory(null)}
-            >
-              <div className="mb-4 text-3xl">{category.icon}</div>
-              <h3 className="text-xl font-display font-semibold mb-2 group-hover:text-primary transition-colors">
-                {category.name}
-              </h3>
-              <p className="text-sm text-muted-foreground">{category.description}</p>
-              
-              {/* Gradient overlay that appears on hover */}
-              <div 
+            <Link to={`/categories/${category.id}`} key={category.id}>
+              <motion.div
                 className={cn(
-                  "absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-primary/10 to-transparent",
-                  "opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  "relative overflow-hidden rounded-2xl hover-lift group cursor-pointer",
+                  "bg-card border border-border/40 p-6 min-h-[180px] flex flex-col",
+                  hoveredCategory === category.id ? "ring-2 ring-primary/50" : ""
                 )}
-              />
-            </motion.div>
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                onMouseEnter={() => setHoveredCategory(category.id)}
+                onMouseLeave={() => setHoveredCategory(null)}
+              >
+                <div className="mb-4 text-3xl">{category.icon}</div>
+                <h3 className="text-xl font-display font-semibold mb-2 group-hover:text-primary transition-colors">
+                  {category.name}
+                </h3>
+                <p className="text-sm text-muted-foreground">{category.description}</p>
+                
+                {/* Gradient overlay that appears on hover */}
+                <div 
+                  className={cn(
+                    "absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-primary/10 to-transparent",
+                    "opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  )}
+                />
+              </motion.div>
+            </Link>
           ))}
         </div>
       </div>
