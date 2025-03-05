@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import UserMenu from './UserMenu';
+import { Info, FileText } from 'lucide-react';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -48,6 +49,14 @@ const Navbar = () => {
             <a href="#professionals" className="text-sm font-medium hover:text-primary transition-colors">
               Find Professionals
             </a>
+            <Link to="/about" className="flex items-center text-sm font-medium hover:text-primary transition-colors">
+              <Info className="w-4 h-4 mr-1" />
+              About Us
+            </Link>
+            <Link to="/privacy" className="flex items-center text-sm font-medium hover:text-primary transition-colors">
+              <FileText className="w-4 h-4 mr-1" />
+              Privacy
+            </Link>
             <UserMenu />
           </nav>
 
@@ -104,6 +113,22 @@ const Navbar = () => {
             >
               Find Professionals
             </a>
+            <Link 
+              to="/about" 
+              className="py-2 text-base font-medium hover:text-primary transition-colors flex items-center"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Info className="w-4 h-4 mr-2" />
+              About Us
+            </Link>
+            <Link 
+              to="/privacy" 
+              className="py-2 text-base font-medium hover:text-primary transition-colors flex items-center"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Privacy Policy
+            </Link>
           </div>
         </div>
       )}
