@@ -19,7 +19,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Generate 100 sample labor providers
+    // Generate 1000 sample labor providers
     const categories = [
       'plumbing', 'electrical', 'carpentry', 'painting', 
       'hvac', 'landscaping', 'cleaning', 'roofing', 
@@ -33,7 +33,12 @@ serve(async (req) => {
       'William', 'Elizabeth', 'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica', 
       'Thomas', 'Sarah', 'Charles', 'Karen', 'Christopher', 'Nancy', 'Daniel', 'Lisa', 
       'Matthew', 'Margaret', 'Anthony', 'Betty', 'Mark', 'Sandra', 'Donald', 'Ashley', 
-      'Steven', 'Dorothy', 'Paul', 'Kimberly', 'Andrew', 'Emily', 'Joshua', 'Donna'
+      'Steven', 'Dorothy', 'Paul', 'Kimberly', 'Andrew', 'Emily', 'Joshua', 'Donna',
+      'Kenneth', 'Michelle', 'Kevin', 'Carol', 'Brian', 'Amanda', 'George', 'Melissa',
+      'Edward', 'Deborah', 'Ronald', 'Stephanie', 'Timothy', 'Rebecca', 'Jason', 'Laura',
+      'Jeffrey', 'Sharon', 'Ryan', 'Cynthia', 'Jacob', 'Kathleen', 'Gary', 'Amy',
+      'Nicholas', 'Shirley', 'Eric', 'Angela', 'Jonathan', 'Helen', 'Stephen', 'Anna',
+      'Larry', 'Brenda', 'Justin', 'Pamela', 'Scott', 'Nicole', 'Brandon', 'Samantha'
     ]
 
     const lastNames = [
@@ -41,205 +46,243 @@ serve(async (req) => {
       'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 
       'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 
       'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 
-      'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores'
+      'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores',
+      'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell',
+      'Carter', 'Roberts', 'Gomez', 'Phillips', 'Evans', 'Turner', 'Diaz', 'Parker',
+      'Cruz', 'Edwards', 'Collins', 'Reyes', 'Stewart', 'Morris', 'Morales', 'Murphy',
+      'Cook', 'Rogers', 'Gutierrez', 'Ortiz', 'Morgan', 'Cooper', 'Peterson', 'Bailey',
+      'Reed', 'Kelly', 'Howard', 'Ramos', 'Kim', 'Cox', 'Ward', 'Richardson', 'Watson'
     ]
 
     const locations = [
       'New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX', 'Phoenix, AZ',
       'Philadelphia, PA', 'San Antonio, TX', 'San Diego, CA', 'Dallas, TX', 'San Jose, CA',
       'Austin, TX', 'Jacksonville, FL', 'Fort Worth, TX', 'Columbus, OH', 'Charlotte, NC',
-      'San Francisco, CA', 'Indianapolis, IN', 'Seattle, WA', 'Denver, CO', 'Boston, MA'
+      'San Francisco, CA', 'Indianapolis, IN', 'Seattle, WA', 'Denver, CO', 'Boston, MA',
+      'Portland, OR', 'Las Vegas, NV', 'Detroit, MI', 'Memphis, TN', 'Baltimore, MD',
+      'Milwaukee, WI', 'Albuquerque, NM', 'Tucson, AZ', 'Fresno, CA', 'Sacramento, CA',
+      'Atlanta, GA', 'Miami, FL', 'Cleveland, OH', 'Raleigh, NC', 'Omaha, NE',
+      'Minneapolis, MN', 'Tulsa, OK', 'Oakland, CA', 'Pittsburgh, PA', 'St. Louis, MO'
     ]
 
-    for (let i = 0; i < 100; i++) {
-      // Generate random data for this professional
-      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
-      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)]
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@example.com`
-      const phone = `+1${Math.floor(Math.random() * 900 + 100)}${Math.floor(Math.random() * 900 + 100)}${Math.floor(Math.random() * 9000 + 1000)}`
-      const category = categories[Math.floor(Math.random() * categories.length)]
-      const hourlyRate = Math.floor(Math.random() * 100) + 20
-      const yearsExperience = Math.floor(Math.random() * 20) + 1
-      const location = locations[Math.floor(Math.random() * locations.length)]
-      const specialties = []
+    // Create batches of 50 professionals to avoid timeouts
+    const batchSize = 50;
+    const totalProfessionals = 1000;
+    const batches = Math.ceil(totalProfessionals / batchSize);
+    
+    let processedCount = 0;
+    
+    for (let batch = 0; batch < batches; batch++) {
+      const batchStart = batch * batchSize;
+      const batchEnd = Math.min(batchStart + batchSize, totalProfessionals);
       
-      // Add 2-4 specialties
-      const numSpecialties = Math.floor(Math.random() * 3) + 2
-      const specialtyOptions = [
-        'Emergency Repairs', 'Installation', 'Maintenance', 'Residential', 
-        'Commercial', 'Industrial', 'Green Solutions', 'Custom Work',
-        'Renovations', 'New Construction', 'Troubleshooting', 'Inspections',
-        'Consultations', 'Upgrades', 'Repairs', 'Smart Home'
-      ]
+      console.log(`Processing batch ${batch + 1}/${batches} (professionals ${batchStart + 1}-${batchEnd})`);
       
-      for (let j = 0; j < numSpecialties; j++) {
-        const specialty = specialtyOptions[Math.floor(Math.random() * specialtyOptions.length)]
-        if (!specialties.includes(specialty)) {
-          specialties.push(specialty)
-        }
-      }
-      
-      // Create the user with auth
-      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-        email,
-        password: 'password123',
-        email_confirm: true,
-        user_metadata: {
-          first_name: firstName,
-          last_name: lastName,
-          is_professional: true,
-          phone: phone
-        }
-      })
-      
-      if (authError) {
-        console.error(`Error creating user ${i}:`, authError)
-        continue
-      }
-      
-      const userId = authUser.user.id
-      
-      // Update profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          location,
-          bio: `Professional ${category} specialist with ${yearsExperience} years of experience.`,
-          avatar_url: `https://i.pravatar.cc/300?u=${userId}`,
-        })
-        .eq('id', userId)
-      
-      if (profileError) {
-        console.error(`Error updating profile for user ${i}:`, profileError)
-      }
-      
-      // Insert professional data
-      const { error: proError } = await supabase
-        .from('professionals')
-        .insert({
-          id: userId,
-          category,
-          hourly_rate: hourlyRate,
-          years_experience: yearsExperience,
-          specialties,
-          verification_badge: Math.random() > 0.3, // 70% have verification
-          availability: ['Available now', 'Available next week', 'Limited availability'][Math.floor(Math.random() * 3)]
-        })
-      
-      if (proError) {
-        console.error(`Error creating professional record for user ${i}:`, proError)
-      }
-      
-      // Generate 3-5 reviews
-      const numReviews = Math.floor(Math.random() * 3) + 3
-      for (let j = 0; j < numReviews; j++) {
-        // Generate a unique ID for each reviewer
-        const reviewerId = crypto.randomUUID()
+      // Process each professional in the current batch
+      for (let i = batchStart; i < batchEnd; i++) {
+        // Generate random data for this professional
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)]
+        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 10000)}@example.com`
+        const phone = `+1${Math.floor(Math.random() * 900 + 100)}${Math.floor(Math.random() * 900 + 100)}${Math.floor(Math.random() * 9000 + 1000)}`
+        const category = categories[Math.floor(Math.random() * categories.length)]
+        const hourlyRate = Math.floor(Math.random() * 100) + 20
+        const yearsExperience = Math.floor(Math.random() * 20) + 1
+        const location = locations[Math.floor(Math.random() * locations.length)]
+        const specialties = []
         
-        // Assume the reviewer is a real user with a profile
-        const reviewerFirstName = firstNames[Math.floor(Math.random() * firstNames.length)]
-        const reviewerLastName = lastNames[Math.floor(Math.random() * lastNames.length)]
+        // Add 2-4 specialties
+        const numSpecialties = Math.floor(Math.random() * 3) + 2
+        const specialtyOptions = [
+          'Emergency Repairs', 'Installation', 'Maintenance', 'Residential', 
+          'Commercial', 'Industrial', 'Green Solutions', 'Custom Work',
+          'Renovations', 'New Construction', 'Troubleshooting', 'Inspections',
+          'Consultations', 'Upgrades', 'Repairs', 'Smart Home'
+        ]
         
-        // Create a profile for the reviewer
-        const { error: reviewerProfileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: reviewerId,
-            first_name: reviewerFirstName,
-            last_name: reviewerLastName,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+        for (let j = 0; j < numSpecialties; j++) {
+          const specialty = specialtyOptions[Math.floor(Math.random() * specialtyOptions.length)]
+          if (!specialties.includes(specialty)) {
+            specialties.push(specialty)
+          }
+        }
+        
+        try {
+          // Create the user with auth
+          const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+            email,
+            password: 'password123',
+            email_confirm: true,
+            user_metadata: {
+              first_name: firstName,
+              last_name: lastName,
+              is_professional: true,
+              phone: phone
+            }
           })
-        
-        if (reviewerProfileError) {
-          console.error(`Error creating reviewer profile:`, reviewerProfileError)
-          continue
-        }
-        
-        // Generate a rating between 3 and 5
-        const rating = Math.floor(Math.random() * 3) + 3
-        
-        // Generate a random comment based on rating
-        let comment
-        if (rating === 5) {
-          comment = [
-            'Excellent service! Very professional and completed the job quickly.',
-            'Couldn\'t be happier with the quality of work. Highly recommend!',
-            'Arrived on time, worked efficiently, and left the area clean. Perfect!',
-            'Outstanding professional. Will definitely hire again for future projects.',
-            'Top-notch service and expertise. Worth every penny!'
-          ][Math.floor(Math.random() * 5)]
-        } else if (rating === 4) {
-          comment = [
-            'Good work overall. Minor issues but addressed them promptly.',
-            'Reliable and knowledgeable. Slightly over the estimated time but good results.',
-            'Professional service with good attention to detail. Would use again.',
-            'Very satisfied with the work. Good communication throughout the project.',
-            'Quality service and fair pricing. Some delays but worth the wait.'
-          ][Math.floor(Math.random() * 5)]
-        } else {
-          comment = [
-            'Decent work but took longer than expected.',
-            'Acceptable service but communication could be improved.',
-            'Got the job done but had to clarify several requirements multiple times.',
-            'Service was okay. Some room for improvement but got the basics right.',
-            'Average service. Met expectations but nothing exceptional.'
-          ][Math.floor(Math.random() * 5)]
-        }
-        
-        // Create the review
-        const { error: reviewError } = await supabase
-          .from('reviews')
-          .insert({
-            professional_id: userId,
-            client_id: reviewerId,
-            rating,
-            comment,
-            created_at: new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000).toISOString() // Random date in the last 90 days
-          })
-        
-        if (reviewError) {
-          console.error(`Error creating review:`, reviewError)
+          
+          if (authError) {
+            console.error(`Error creating user ${i}:`, authError)
+            continue
+          }
+          
+          const userId = authUser.user.id
+          
+          // Update profile
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({
+              location,
+              bio: `Professional ${category} specialist with ${yearsExperience} years of experience.`,
+              avatar_url: `https://i.pravatar.cc/300?u=${userId}`,
+            })
+            .eq('id', userId)
+          
+          if (profileError) {
+            console.error(`Error updating profile for user ${i}:`, profileError)
+          }
+          
+          // Insert professional data
+          const { error: proError } = await supabase
+            .from('professionals')
+            .insert({
+              id: userId,
+              category,
+              hourly_rate: hourlyRate,
+              years_experience: yearsExperience,
+              specialties,
+              verification_badge: Math.random() > 0.3, // 70% have verification
+              availability: ['Available now', 'Available next week', 'Limited availability'][Math.floor(Math.random() * 3)]
+            })
+          
+          if (proError) {
+            console.error(`Error creating professional record for user ${i}:`, proError)
+          }
+          
+          // Generate 3-5 reviews
+          const numReviews = Math.floor(Math.random() * 3) + 3
+          for (let j = 0; j < numReviews; j++) {
+            // Generate a unique ID for each reviewer
+            const reviewerId = crypto.randomUUID()
+            
+            // Assume the reviewer is a real user with a profile
+            const reviewerFirstName = firstNames[Math.floor(Math.random() * firstNames.length)]
+            const reviewerLastName = lastNames[Math.floor(Math.random() * lastNames.length)]
+            
+            // Create a profile for the reviewer
+            const { error: reviewerProfileError } = await supabase
+              .from('profiles')
+              .insert({
+                id: reviewerId,
+                first_name: reviewerFirstName,
+                last_name: reviewerLastName,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+            
+            if (reviewerProfileError) {
+              console.error(`Error creating reviewer profile:`, reviewerProfileError)
+              continue
+            }
+            
+            // Generate a rating between 3 and 5
+            const rating = Math.floor(Math.random() * 3) + 3
+            
+            // Generate a random comment based on rating
+            let comment
+            if (rating === 5) {
+              comment = [
+                'Excellent service! Very professional and completed the job quickly.',
+                'Couldn\'t be happier with the quality of work. Highly recommend!',
+                'Arrived on time, worked efficiently, and left the area clean. Perfect!',
+                'Outstanding professional. Will definitely hire again for future projects.',
+                'Top-notch service and expertise. Worth every penny!'
+              ][Math.floor(Math.random() * 5)]
+            } else if (rating === 4) {
+              comment = [
+                'Good work overall. Minor issues but addressed them promptly.',
+                'Reliable and knowledgeable. Slightly over the estimated time but good results.',
+                'Professional service with good attention to detail. Would use again.',
+                'Very satisfied with the work. Good communication throughout the project.',
+                'Quality service and fair pricing. Some delays but worth the wait.'
+              ][Math.floor(Math.random() * 5)]
+            } else {
+              comment = [
+                'Decent work but took longer than expected.',
+                'Acceptable service but communication could be improved.',
+                'Got the job done but had to clarify several requirements multiple times.',
+                'Service was okay. Some room for improvement but got the basics right.',
+                'Average service. Met expectations but nothing exceptional.'
+              ][Math.floor(Math.random() * 5)]
+            }
+            
+            // Create the review
+            const { error: reviewError } = await supabase
+              .from('reviews')
+              .insert({
+                professional_id: userId,
+                client_id: reviewerId,
+                rating,
+                comment,
+                created_at: new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000).toISOString() // Random date in the last 90 days
+              })
+            
+            if (reviewError) {
+              console.error(`Error creating review:`, reviewError)
+            }
+          }
+          
+          // Generate a featured project for some professionals
+          if (Math.random() > 0.5) { // 50% have a featured project
+            const projectTitles = {
+              plumbing: ['Complete Bathroom Remodel', 'Kitchen Sink Installation', 'Water Heater Replacement'],
+              electrical: ['Home Rewiring', 'Smart Home Installation', 'Lighting System Upgrade'],
+              carpentry: ['Custom Kitchen Cabinets', 'Deck Construction', 'Built-in Bookshelves'],
+              painting: ['Exterior Home Painting', 'Interior Color Transformation', 'Cabinet Refinishing'],
+              hvac: ['Central AC Installation', 'Heating System Upgrade', 'Ductwork Replacement'],
+              landscaping: ['Garden Design & Implementation', 'Backyard Transformation', 'Water Feature Installation'],
+              cleaning: ['Deep Home Cleaning', 'Post-Construction Cleanup', 'Move-out Cleaning'],
+              roofing: ['Complete Roof Replacement', 'Roof Leak Repair', 'Gutter System Installation']
+            }
+            
+            const defaultTitles = ['Professional Service Project', 'Client Renovation', 'Custom Installation']
+            
+            const titles = projectTitles[category as keyof typeof projectTitles] || defaultTitles
+            const title = titles[Math.floor(Math.random() * titles.length)]
+            
+            const { error: projectError } = await supabase
+              .from('projects')
+              .insert({
+                professional_id: userId,
+                title,
+                description: `A showcase of my best work in ${category}. This project demonstrates my attention to detail and commitment to quality.`,
+                image_url: `https://source.unsplash.com/random/600x400?${category}`,
+                completion_date: new Date(Date.now() - Math.floor(Math.random() * 180) * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Random date in the last 180 days
+                is_featured: true
+              })
+            
+            if (projectError) {
+              console.error(`Error creating project:`, projectError)
+            }
+          }
+          
+          processedCount++;
+          if (processedCount % 10 === 0) {
+            console.log(`Created ${processedCount} professionals so far`)
+          }
+        } catch (error) {
+          console.error(`Error processing professional ${i}:`, error)
         }
       }
       
-      // Generate a featured project for some professionals
-      if (Math.random() > 0.5) { // 50% have a featured project
-        const projectTitles = {
-          plumbing: ['Complete Bathroom Remodel', 'Kitchen Sink Installation', 'Water Heater Replacement'],
-          electrical: ['Home Rewiring', 'Smart Home Installation', 'Lighting System Upgrade'],
-          carpentry: ['Custom Kitchen Cabinets', 'Deck Construction', 'Built-in Bookshelves'],
-          painting: ['Exterior Home Painting', 'Interior Color Transformation', 'Cabinet Refinishing'],
-          hvac: ['Central AC Installation', 'Heating System Upgrade', 'Ductwork Replacement'],
-          landscaping: ['Garden Design & Implementation', 'Backyard Transformation', 'Water Feature Installation'],
-          cleaning: ['Deep Home Cleaning', 'Post-Construction Cleanup', 'Move-out Cleaning'],
-          roofing: ['Complete Roof Replacement', 'Roof Leak Repair', 'Gutter System Installation']
-        }
-        
-        const defaultTitles = ['Professional Service Project', 'Client Renovation', 'Custom Installation']
-        
-        const titles = projectTitles[category as keyof typeof projectTitles] || defaultTitles
-        const title = titles[Math.floor(Math.random() * titles.length)]
-        
-        const { error: projectError } = await supabase
-          .from('projects')
-          .insert({
-            professional_id: userId,
-            title,
-            description: `A showcase of my best work in ${category}. This project demonstrates my attention to detail and commitment to quality.`,
-            image_url: `https://source.unsplash.com/random/600x400?${category}`,
-            completion_date: new Date(Date.now() - Math.floor(Math.random() * 180) * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Random date in the last 180 days
-            is_featured: true
-          })
-        
-        if (projectError) {
-          console.error(`Error creating project:`, projectError)
-        }
+      // Add a small delay between batches to avoid overloading the database
+      if (batch < batches - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Generated 100 sample labor providers with reviews' }),
+      JSON.stringify({ success: true, message: `Generated ${processedCount} sample labor providers with reviews` }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
