@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -78,6 +77,12 @@ const UserMenu = () => {
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </DropdownMenuItem>
+          {isProfessional && (
+            <DropdownMenuItem onClick={() => window.location.href = '/professional-profile'}>
+              <Briefcase className="mr-2 h-4 w-4" />
+              <span>Professional Profile</span>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>

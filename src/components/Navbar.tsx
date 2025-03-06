@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -46,9 +45,12 @@ const Navbar = () => {
             <a href="#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">
               How It Works
             </a>
-            <a href="#professionals" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link
+              to="/professionals"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
               Find Professionals
-            </a>
+            </Link>
             <Link to="/about" className="flex items-center text-sm font-medium hover:text-primary transition-colors">
               <Info className="w-4 h-4 mr-1" />
               About Us
@@ -106,13 +108,13 @@ const Navbar = () => {
             >
               How It Works
             </a>
-            <a 
-              href="#professionals" 
+            <Link
+              to="/professionals"
               className="py-2 text-base font-medium hover:text-primary transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Find Professionals
-            </a>
+            </Link>
             <Link 
               to="/about" 
               className="py-2 text-base font-medium hover:text-primary transition-colors flex items-center"
