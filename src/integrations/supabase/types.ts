@@ -9,6 +9,58 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          booking_date: string
+          client_id: string
+          created_at: string
+          id: string
+          professional_id: string
+          service_id: string
+          status: string
+        }
+        Insert: {
+          booking_date: string
+          client_id: string
+          created_at?: string
+          id?: string
+          professional_id: string
+          service_id: string
+          status?: string
+        }
+        Update: {
+          booking_date?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          professional_id?: string
+          service_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           client_id: string
@@ -338,6 +390,44 @@ export type Database = {
           },
           {
             foreignKeyName: "reviews_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string
+          duration: number
+          id: string
+          price: number
+          professional_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          duration: number
+          id?: string
+          price: number
+          professional_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          duration?: number
+          id?: string
+          price?: number
+          professional_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_professional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
             referencedRelation: "professionals"
