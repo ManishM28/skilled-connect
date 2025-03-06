@@ -72,7 +72,7 @@ const ProfessionalCard = ({ professional, featured = false }: ProfessionalCardPr
         title: professional.featured_project.title,
         image: professional.featured_project.image_url || '/placeholder.svg',
         description: professional.featured_project.description || ''
-      }
+      } : undefined
     : professional.featuredProject;
 
   // Determine if services are available
