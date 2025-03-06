@@ -46,7 +46,7 @@ export type Booking = {
   booking_date: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   created_at: string;
-  client: {
+  client?: {
     first_name: string | null;
     last_name: string | null;
     location: string | null;
@@ -213,7 +213,11 @@ export async function getProfessionalBookings(professionalId: string): Promise<B
     return [];
   }
 
-  return data || [];
+  // Cast the status to the specific string literals expected by the Booking type
+  return (data || []).map(booking => ({
+    ...booking,
+    status: booking.status as 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  }));
 }
 
 export async function getClientBookings(clientId: string): Promise<Booking[]> {
@@ -231,7 +235,11 @@ export async function getClientBookings(clientId: string): Promise<Booking[]> {
     return [];
   }
 
-  return data || [];
+  // Cast the status to the specific string literals expected by the Booking type
+  return (data || []).map(booking => ({
+    ...booking,
+    status: booking.status as 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  }));
 }
 
 export async function createBooking(booking: Omit<Booking, 'id' | 'created_at' | 'client'>): Promise<Booking | null> {
@@ -246,5 +254,9 @@ export async function createBooking(booking: Omit<Booking, 'id' | 'created_at' |
     return null;
   }
 
-  return data;
+  // Cast the status to the specific string literals expected by the Booking type
+  return {
+    ...data,
+    status: data.status as 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  };
 }
