@@ -27,7 +27,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Loader2, Plus, X } from 'lucide-react';
+import { Loader2, Plus, X, Phone } from 'lucide-react';
 
 const profileFormSchema = z.object({
   hourly_rate: z.string()
@@ -41,7 +41,7 @@ const profileFormSchema = z.object({
   location: z.string().min(1, { message: 'Please enter your location' }),
   first_name: z.string().min(1, { message: 'Please enter your first name' }),
   last_name: z.string().min(1, { message: 'Please enter your last name' }),
-  phone: z.string().min(1, { message: 'Please enter your phone number' }),
+  phone: z.string().min(10, { message: 'Please enter a valid phone number' }),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -242,10 +242,16 @@ const ProfessionalProfileForm = () => {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Phone Number
+                    <Phone className="ml-2 h-4 w-4 text-primary" />
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="Phone Number" {...field} />
                   </FormControl>
+                  <FormDescription>
+                    Your phone number will be visible to clients who can call you directly through our platform.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -395,6 +401,17 @@ const ProfessionalProfileForm = () => {
                 <Plus className="h-4 w-4 mr-1" /> Add
               </Button>
             </div>
+          </div>
+          
+          <div className="p-4 bg-muted/40 rounded-lg border border-border">
+            <h3 className="text-sm font-medium flex items-center mb-2">
+              <Phone className="h-4 w-4 mr-2 text-primary" />
+              Phone Calling Feature
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              By providing your phone number, clients will be able to call you directly from our platform. 
+              Ensure your phone number is accurate and up-to-date.
+            </p>
           </div>
           
           <Button type="submit" className="w-full" disabled={loading}>

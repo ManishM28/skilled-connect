@@ -1,13 +1,14 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, MapPin, BadgeCheck, ArrowRight, Briefcase } from 'lucide-react';
+import { Star, MapPin, BadgeCheck, ArrowRight, Briefcase, Phone } from 'lucide-react';
 import { Professional } from '@/data/professionals';
 import { ProfessionalWithProfile, Service } from '@/services/professionalService';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import ProfessionalServices from './ProfessionalServices';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProfessionalCardProps {
   professional: Professional | ProfessionalWithProfile;
@@ -17,6 +18,7 @@ interface ProfessionalCardProps {
 const ProfessionalCard = ({ professional, featured = false }: ProfessionalCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showServices, setShowServices] = useState(false);
+  const { toast } = useToast();
 
   // Check if this is a ProfessionalWithProfile type
   const isWithProfile = 'profile' in professional;
@@ -75,8 +77,30 @@ const ProfessionalCard = ({ professional, featured = false }: ProfessionalCardPr
       } : undefined
     : professional.featuredProject;
 
+  // Get phone number
+  const phoneNumber = isWithProfile
+    ? professional.profile.phone || ''
+    : '';
+
   // Determine if services are available
   const hasServices = isWithProfile && professional.services && professional.services.length > 0;
+
+  // Handle phone call
+  const handleCall = () => {
+    if (phoneNumber) {
+      window.location.href = `tel:${phoneNumber}`;
+      toast({
+        title: "Calling",
+        description: `Calling ${name}...`,
+      });
+    } else {
+      toast({
+        title: "Phone Unavailable",
+        description: "This professional hasn't provided a phone number.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <motion.div 
@@ -174,6 +198,17 @@ const ProfessionalCard = ({ professional, featured = false }: ProfessionalCardPr
             </div>
             
             <div className="mt-4 space-y-2">
+              {phoneNumber && (
+                <Button 
+                  variant="outline" 
+                  className="w-full flex items-center justify-center"
+                  onClick={handleCall}
+                >
+                  <Phone className="mr-2 w-4 h-4" />
+                  Call Now
+                </Button>
+              )}
+              
               {hasServices && (
                 <Button 
                   variant="outline" 

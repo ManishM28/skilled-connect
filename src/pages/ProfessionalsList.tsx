@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ProfessionalWithProfile, getTopProfessionals } from '@/services/professionalService';
 import ProfessionalCard from '@/components/ProfessionalCard';
 import { categories } from '@/data/categories';
-import { Loader2, Filter } from 'lucide-react';
+import { Loader2, Filter, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 const ProfessionalsList = () => {
   const [professionals, setProfessionals] = useState<ProfessionalWithProfile[]>([]);
@@ -21,8 +22,10 @@ const ProfessionalsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [priceRange, setPriceRange] = useState<string>('');
+  const [showOnlyWithPhone, setShowOnlyWithPhone] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProfessionals = async () => {
@@ -48,7 +51,7 @@ const ProfessionalsList = () => {
     fetchProfessionals();
   }, [location]);
 
-  // Filter professionals based on search, category, and price range
+  // Filter professionals based on search, category, price range, and phone availability
   const filteredProfessionals = professionals.filter(pro => {
     const nameMatch = 
       `${pro.profile.first_name} ${pro.profile.last_name}`
@@ -73,7 +76,9 @@ const ProfessionalsList = () => {
       }
     }
     
-    return nameMatch && categoryMatch && priceMatch;
+    const phoneMatch = showOnlyWithPhone ? !!pro.profile.phone : true;
+    
+    return nameMatch && categoryMatch && priceMatch && phoneMatch;
   });
 
   return (
@@ -125,11 +130,23 @@ const ProfessionalsList = () => {
           </Select>
         </div>
         
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Filter className="w-4 h-4 mr-1" />
-          <span>
-            Showing {filteredProfessionals.length} of {professionals.length} professionals
-          </span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Filter className="w-4 h-4 mr-1" />
+            <span>
+              Showing {filteredProfessionals.length} of {professionals.length} professionals
+            </span>
+          </div>
+          
+          <Button 
+            variant={showOnlyWithPhone ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowOnlyWithPhone(!showOnlyWithPhone)}
+            className="flex items-center gap-2"
+          >
+            <Phone className="h-4 w-4" />
+            {showOnlyWithPhone ? "Showing call-enabled" : "Show call-enabled only"}
+          </Button>
         </div>
       </div>
       
