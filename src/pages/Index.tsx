@@ -1,11 +1,12 @@
-
 import { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import CategorySection from '@/components/CategorySection';
 import FeaturedProfessionals from '@/components/FeaturedProfessionals';
 import Footer from '@/components/Footer';
-import { ArrowDown, ShieldCheck, Zap, MessageSquare, Medal } from 'lucide-react';
+import Map from '@/components/Map';
+import EmergencySOS from '@/components/EmergencySOS';
+import { ArrowDown, ShieldCheck, Zap, MessageSquare, Medal, MapPin } from 'lucide-react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 
 const Index = () => {
@@ -16,7 +17,6 @@ const Index = () => {
     restDelta: 0.001
   });
 
-  // Smooth scroll to anchor links
   useEffect(() => {
     const handleAnchorClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -40,7 +40,6 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen">
-      {/* Progress Bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-primary z-50 origin-left"
         style={{ scaleX }}
@@ -57,21 +56,25 @@ const Index = () => {
         
         <FeaturedProfessionals />
         
+        <LocationMapSection />
+        
         <TestimonialsSection />
         
         <CallToActionSection />
       </main>
       
       <Footer />
+      
+      <div className="fixed bottom-6 right-6 z-40">
+        <EmergencySOS />
+      </div>
     </div>
   );
 };
 
-// How It Works Section Component
 const HowItWorksSection = () => {
   return (
     <section id="how-it-works" className="py-24 bg-background relative overflow-hidden">
-      {/* Background design elements */}
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-accent/30 rounded-full blur-3xl opacity-50 -z-10" />
       <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-primary/10 rounded-full blur-3xl opacity-50 -z-10" />
       
@@ -86,7 +89,6 @@ const HowItWorksSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-          {/* Connecting line between steps (visible on larger screens) */}
           <div className="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-border z-0" />
           
           <StepCard
@@ -124,7 +126,6 @@ const HowItWorksSection = () => {
   );
 };
 
-// Step Card Component
 const StepCard = ({ 
   number, 
   title, 
@@ -153,7 +154,6 @@ const StepCard = ({
   );
 };
 
-// Testimonials Section
 const TestimonialsSection = () => {
   const testimonials = [
     {
@@ -222,11 +222,9 @@ const TestimonialsSection = () => {
   );
 };
 
-// Call to Action Section
 const CallToActionSection = () => {
   return (
     <section className="py-24 bg-primary text-primary-foreground relative overflow-hidden">
-      {/* Background design elements */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 -skew-x-12 -z-0" />
       <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-white/5 rounded-full blur-3xl -z-0" />
       
@@ -252,6 +250,73 @@ const CallToActionSection = () => {
             >
               Become a Professional
             </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const LocationMapSection = () => {
+  return (
+    <section id="locations" className="py-24 bg-background relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/10 rounded-full blur-3xl opacity-30 -z-10" />
+      
+      <div className="container px-6 md:px-10 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+            Find Professionals Near You
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Discover skilled workers in your area ready to help with your projects
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+          <div className="lg:col-span-2">
+            <Map />
+          </div>
+          
+          <div className="space-y-6">
+            <div className="bg-accent/30 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 flex items-center">
+                <MapPin className="mr-2 h-5 w-5 text-primary" />
+                Location Services
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Use our interactive map to find professionals near your location. Click "Locate Me" to see services available in your area.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <span className="bg-primary/20 p-1 rounded-full mr-2 mt-0.5">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                  </span>
+                  <span className="text-sm">Find verified professionals nearby</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="bg-primary/20 p-1 rounded-full mr-2 mt-0.5">
+                    <Zap className="h-4 w-4 text-primary" />
+                  </span>
+                  <span className="text-sm">Get emergency services quickly</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="bg-primary/20 p-1 rounded-full mr-2 mt-0.5">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                  </span>
+                  <span className="text-sm">Contact professionals directly</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-destructive/10 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 text-destructive flex items-center">
+                Emergency Services
+              </h3>
+              <p className="mb-4">
+                Need immediate assistance? Use our Emergency SOS feature to connect with available professionals right away.
+              </p>
+              <EmergencySOS />
+            </div>
           </div>
         </div>
       </div>
