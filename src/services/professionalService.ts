@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export type ProfessionalWithProfile = {
@@ -27,6 +26,8 @@ export type ProfessionalWithProfile = {
   } | null;
   services?: Service[];
   bookings?: Booking[];
+  emergency_available?: boolean;
+  daily_pay_available?: boolean;
 };
 
 export type Service = {
@@ -37,6 +38,8 @@ export type Service = {
   price: number;
   duration: number; // in minutes
   created_at: string;
+  is_emergency?: boolean;
+  is_daily_pay?: boolean;
 };
 
 export type Booking = {
@@ -47,12 +50,24 @@ export type Booking = {
   booking_date: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   created_at: string;
+  is_emergency?: boolean;
+  is_daily_pay?: boolean;
   client?: {
     first_name: string | null;
     last_name: string | null;
     location: string | null;
     phone: string | null;
   };
+};
+
+export type EmergencySOS = {
+  id: string;
+  client_id: string;
+  professional_id: string | null;
+  location: string;
+  description: string;
+  status: 'active' | 'resolved' | 'cancelled';
+  created_at: string;
 };
 
 export async function getFeaturedProfessionals(limit = 3): Promise<ProfessionalWithProfile[]> {
@@ -71,7 +86,6 @@ export async function getFeaturedProfessionals(limit = 3): Promise<ProfessionalW
     return [];
   }
 
-  // Calculate average rating and review count
   return data.map(pro => {
     const ratings = pro.avg_rating as { rating: number }[] || [];
     const avg = ratings.length 
@@ -82,7 +96,9 @@ export async function getFeaturedProfessionals(limit = 3): Promise<ProfessionalW
       ...pro,
       avg_rating: avg,
       review_count: ratings.length,
-      featured_project: null, // Will be populated later
+      featured_project: null,
+      emergency_available: pro.emergency_available || false,
+      daily_pay_available: pro.daily_pay_available || false
     } as ProfessionalWithProfile;
   });
 }
@@ -108,7 +124,6 @@ export async function getProfessionalsByCategory(
     return [];
   }
 
-  // Calculate average rating and review count
   return data.map(pro => {
     const ratings = pro.avg_rating as { rating: number }[] || [];
     const avg = ratings.length 
@@ -119,7 +134,9 @@ export async function getProfessionalsByCategory(
       ...pro,
       avg_rating: avg,
       review_count: ratings.length,
-      featured_project: null, // Will be populated later
+      featured_project: null,
+      emergency_available: pro.emergency_available || false,
+      daily_pay_available: pro.daily_pay_available || false
     } as ProfessionalWithProfile;
   });
 }
@@ -140,7 +157,6 @@ export async function getTopProfessionals(limit = 20): Promise<ProfessionalWithP
     return [];
   }
 
-  // Calculate average rating and review count
   return data.map(pro => {
     const ratings = pro.avg_rating as { rating: number }[] || [];
     const avg = ratings.length 
@@ -151,9 +167,128 @@ export async function getTopProfessionals(limit = 20): Promise<ProfessionalWithP
       ...pro,
       avg_rating: avg,
       review_count: ratings.length,
-      featured_project: null, // Will be populated later
+      featured_project: null,
+      emergency_available: pro.emergency_available || false,
+      daily_pay_available: pro.daily_pay_available || false
     } as ProfessionalWithProfile;
   });
+}
+
+export async function getEmergencyProfessionals(limit = 10): Promise<ProfessionalWithProfile[]> {
+  const { data, error } = await supabase
+    .from('professionals')
+    .select(`
+      *,
+      profile: profiles(first_name, last_name, avatar_url, location, bio, phone),
+      avg_rating: reviews(rating)
+    `)
+    .eq('emergency_available', true)
+    .order('years_experience', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching emergency professionals:', error);
+    return [];
+  }
+
+  return data.map(pro => {
+    const ratings = pro.avg_rating as { rating: number }[] || [];
+    const avg = ratings.length 
+      ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+      : null;
+    
+    return {
+      ...pro,
+      avg_rating: avg,
+      review_count: ratings.length,
+      featured_project: null,
+      emergency_available: true,
+      daily_pay_available: pro.daily_pay_available || false
+    } as ProfessionalWithProfile;
+  });
+}
+
+export async function getDailyPayProfessionals(limit = 10): Promise<ProfessionalWithProfile[]> {
+  const { data, error } = await supabase
+    .from('professionals')
+    .select(`
+      *,
+      profile: profiles(first_name, last_name, avatar_url, location, bio, phone),
+      avg_rating: reviews(rating)
+    `)
+    .eq('daily_pay_available', true)
+    .order('years_experience', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching daily pay professionals:', error);
+    return [];
+  }
+
+  return data.map(pro => {
+    const ratings = pro.avg_rating as { rating: number }[] || [];
+    const avg = ratings.length 
+      ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+      : null;
+    
+    return {
+      ...pro,
+      avg_rating: avg,
+      review_count: ratings.length,
+      featured_project: null,
+      emergency_available: pro.emergency_available || false,
+      daily_pay_available: true
+    } as ProfessionalWithProfile;
+  });
+}
+
+export async function createEmergencySOS(
+  emergencySOS: Omit<EmergencySOS, 'id' | 'created_at' | 'status'>
+): Promise<EmergencySOS | null> {
+  const { data, error } = await supabase
+    .from('emergency_sos')
+    .insert([{ ...emergencySOS, status: 'active' }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating emergency SOS:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function getClientEmergencySOS(clientId: string): Promise<EmergencySOS[]> {
+  const { data, error } = await supabase
+    .from('emergency_sos')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching client emergency SOS:', error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function updateEmergencySOSStatus(
+  id: string, 
+  status: 'active' | 'resolved' | 'cancelled'
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('emergency_sos')
+    .update({ status })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating emergency SOS status:', error);
+    return false;
+  }
+
+  return true;
 }
 
 export async function getTotalProfessionalsCount(): Promise<number> {
@@ -214,7 +349,6 @@ export async function getProfessionalBookings(professionalId: string): Promise<B
     return [];
   }
 
-  // Cast the status to the specific string literals expected by the Booking type
   return (data || []).map(booking => ({
     ...booking,
     status: booking.status as 'pending' | 'confirmed' | 'completed' | 'cancelled'
@@ -236,7 +370,6 @@ export async function getClientBookings(clientId: string): Promise<Booking[]> {
     return [];
   }
 
-  // Cast the status to the specific string literals expected by the Booking type
   return (data || []).map(booking => ({
     ...booking,
     status: booking.status as 'pending' | 'confirmed' | 'completed' | 'cancelled'
@@ -255,7 +388,6 @@ export async function createBooking(booking: Omit<Booking, 'id' | 'created_at' |
     return null;
   }
 
-  // Cast the status to the specific string literals expected by the Booking type
   return {
     ...data,
     status: data.status as 'pending' | 'confirmed' | 'completed' | 'cancelled'

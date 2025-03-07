@@ -24,10 +24,11 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
+import { Switch } from '@/components/ui/switch';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Loader2, Plus, X, Phone } from 'lucide-react';
+import { Loader2, Plus, X, Phone, AlertCircle, DollarSign } from 'lucide-react';
 
 const profileFormSchema = z.object({
   hourly_rate: z.string()
@@ -42,6 +43,8 @@ const profileFormSchema = z.object({
   first_name: z.string().min(1, { message: 'Please enter your first name' }),
   last_name: z.string().min(1, { message: 'Please enter your last name' }),
   phone: z.string().min(10, { message: 'Please enter a valid phone number' }),
+  emergency_available: z.boolean().optional(),
+  daily_pay_available: z.boolean().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -52,6 +55,8 @@ const ProfessionalProfileForm = () => {
   const [loading, setLoading] = useState(false);
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [newSpecialty, setNewSpecialty] = useState('');
+  const [emergencyAvailable, setEmergencyAvailable] = useState(false);
+  const [dailyPayAvailable, setDailyPayAvailable] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -65,6 +70,8 @@ const ProfessionalProfileForm = () => {
       first_name: profile?.first_name || '',
       last_name: profile?.last_name || '',
       phone: profile?.phone || '',
+      emergency_available: false,
+      daily_pay_available: false,
     },
   });
 
@@ -92,6 +99,10 @@ const ProfessionalProfileForm = () => {
           form.setValue('category', data.category || '');
           form.setValue('availability', data.availability || '');
           setSpecialties(data.specialties || []);
+          setEmergencyAvailable(data.emergency_available || false);
+          setDailyPayAvailable(data.daily_pay_available || false);
+          form.setValue('emergency_available', data.emergency_available || false);
+          form.setValue('daily_pay_available', data.daily_pay_available || false);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -146,6 +157,8 @@ const ProfessionalProfileForm = () => {
         years_experience: parseInt(values.years_experience),
         availability: values.availability,
         specialties,
+        emergency_available: values.emergency_available,
+        daily_pay_available: values.daily_pay_available,
       };
       
       if (existingPro) {
@@ -401,6 +414,56 @@ const ProfessionalProfileForm = () => {
                 <Plus className="h-4 w-4 mr-1" /> Add
               </Button>
             </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6">
+            <FormField
+              control={form.control}
+              name="emergency_available"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base flex items-center">
+                      <AlertCircle className="mr-2 h-4 w-4 text-destructive" />
+                      Emergency Services
+                    </FormLabel>
+                    <FormDescription>
+                      Make yourself available for emergency service requests from clients.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="daily_pay_available"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base flex items-center">
+                      <DollarSign className="mr-2 h-4 w-4 text-green-500" />
+                      Daily Pay Available
+                    </FormLabel>
+                    <FormDescription>
+                      Indicate that you accept daily payments rather than hourly or project-based.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           
           <div className="p-4 bg-muted/40 rounded-lg border border-border">

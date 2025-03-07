@@ -1,264 +1,161 @@
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Star, MapPin, BadgeCheck, ArrowRight, Briefcase, Phone } from 'lucide-react';
-import { Professional } from '@/data/professionals';
-import { ProfessionalWithProfile, Service } from '@/services/professionalService';
-import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
+import { ProfessionalWithProfile } from '@/services/professionalService';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import ProfessionalServices from './ProfessionalServices';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { 
+  Star, 
+  MapPin, 
+  Phone, 
+  Check, 
+  Clock, 
+  DollarSign, 
+  AlertCircle 
+} from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ProfessionalCardProps {
-  professional: Professional | ProfessionalWithProfile;
-  featured?: boolean;
+  professional: ProfessionalWithProfile;
 }
 
-const ProfessionalCard = ({ professional, featured = false }: ProfessionalCardProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [showServices, setShowServices] = useState(false);
-  const { toast } = useToast();
+const ProfessionalCard = ({ professional }: ProfessionalCardProps) => {
+  const { 
+    id, 
+    profile, 
+    hourly_rate, 
+    category,
+    specialties, 
+    verification_badge, 
+    availability, 
+    avg_rating, 
+    review_count,
+    emergency_available,
+    daily_pay_available
+  } = professional;
 
-  // Check if this is a ProfessionalWithProfile type
-  const isWithProfile = 'profile' in professional;
-  
-  // Access the correct name field depending on the type
-  const name = isWithProfile 
-    ? `${professional.profile.first_name || ''} ${professional.profile.last_name || ''}`.trim()
-    : professional.name;
-  
-  // Access the correct profile image
-  const profileImage = isWithProfile
-    ? professional.profile.avatar_url || '/placeholder.svg'
-    : professional.profileImage;
-    
-  // Access the correct location
-  const location = isWithProfile
-    ? professional.profile.location || 'Unknown location'
-    : professional.location;
-
-  // Always use verificationBadge from professional
-  const verificationBadge = isWithProfile
-    ? professional.verification_badge
-    : professional.verificationBadge;
-
-  // Get the rating value
-  const rating = isWithProfile
-    ? professional.avg_rating || 0
-    : professional.rating;
-
-  // Get the review count
-  const reviewCount = isWithProfile
-    ? professional.review_count
-    : professional.reviewCount;
-
-  // Get the hourly rate
-  const hourlyRate = isWithProfile
-    ? professional.hourly_rate || 0
-    : professional.hourlyRate;
-
-  // Get the description
-  const description = isWithProfile
-    ? professional.profile.bio || 'No description available'
-    : professional.description;
-
-  // Get the availability
-  const availability = isWithProfile
-    ? professional.availability || 'Contact for availability'
-    : professional.availability;
-
-  // Get featured project
-  const featuredProject = isWithProfile
-    ? professional.featured_project ? {
-        title: professional.featured_project.title,
-        image: professional.featured_project.image_url || '/placeholder.svg',
-        description: professional.featured_project.description || ''
-      } : undefined
-    : professional.featuredProject;
-
-  // Get phone number
-  const phoneNumber = isWithProfile
-    ? professional.profile.phone || ''
-    : '';
-
-  // Determine if services are available
-  const hasServices = isWithProfile && professional.services && professional.services.length > 0;
+  const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+  const initials = fullName
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase();
 
   // Handle phone call
-  const handleCall = () => {
-    if (phoneNumber) {
-      window.location.href = `tel:${phoneNumber}`;
-      toast({
-        title: "Calling",
-        description: `Calling ${name}...`,
-      });
-    } else {
-      toast({
-        title: "Phone Unavailable",
-        description: "This professional hasn't provided a phone number.",
-        variant: "destructive"
-      });
+  const handleCall = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (profile.phone) {
+      window.location.href = `tel:${profile.phone}`;
     }
   };
 
   return (
-    <motion.div 
-      className={cn(
-        "group rounded-2xl overflow-hidden hover-lift bg-card border border-border/40",
-        featured ? "col-span-full md:col-span-2" : "col-span-1"
-      )}
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 300 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className={cn(
-        "flex flex-col h-full",
-        featured && "md:flex-row"
-      )}>
-        {featured && featuredProject && (
-          <div className="relative md:w-1/2 h-60 md:h-auto overflow-hidden">
-            <img 
-              src={featuredProject.image} 
-              alt={featuredProject.title}
-              className={cn(
-                "object-cover w-full h-full",
-                "transition-transform duration-500 ease-out",
-                isHovered ? "scale-105" : "scale-100"
-              )}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-              <div className="p-4 text-white">
-                <div className="text-xs uppercase tracking-wider mb-1 opacity-80">Featured Project</div>
-                <div className="font-semibold">{featuredProject.title}</div>
-              </div>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="pb-4">
+        <div className="flex items-start justify-between">
+          <div className="flex gap-3">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={profile.avatar_url || ''} alt={fullName} />
+              <AvatarFallback>{initials || '?'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-semibold text-lg flex items-center gap-1">
+                {fullName}
+                {verification_badge && (
+                  <Check className="h-4 w-4 text-primary rounded-full bg-primary/10 p-0.5" />
+                )}
+              </h3>
+              <p className="text-sm text-muted-foreground">{category}</p>
             </div>
+          </div>
+          <div className="flex flex-col items-end">
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <span className="font-medium">
+                {avg_rating ? avg_rating.toFixed(1) : 'New'}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                ({review_count})
+              </span>
+            </div>
+            <p className="font-semibold text-lg">${hourly_rate}/hr</p>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pb-4 flex-grow">
+        {profile.location && (
+          <p className="text-sm flex items-center gap-1 text-muted-foreground mb-2">
+            <MapPin className="h-3.5 w-3.5" />
+            {profile.location}
+          </p>
+        )}
+
+        {availability && (
+          <p className="text-sm flex items-center gap-1 text-muted-foreground mb-2">
+            <Clock className="h-3.5 w-3.5" />
+            {availability}
+          </p>
+        )}
+
+        {specialties && specialties.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {specialties.slice(0, 3).map((specialty, i) => (
+              <Badge key={i} variant="secondary" className="font-normal">
+                {specialty}
+              </Badge>
+            ))}
+            {specialties.length > 3 && (
+              <Badge variant="outline" className="font-normal">
+                +{specialties.length - 3} more
+              </Badge>
+            )}
           </div>
         )}
         
-        <div className={cn(
-          "flex flex-col p-6",
-          featured && "md:w-1/2"
-        )}>
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center">
-              <div className="relative mr-4">
-                <img 
-                  src={profileImage} 
-                  alt={name}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-white"
-                />
-                {verificationBadge && (
-                  <span className="absolute -bottom-1 -right-1 bg-primary text-white rounded-full p-0.5">
-                    <BadgeCheck className="w-4 h-4" />
-                  </span>
-                )}
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
-                  {name}
-                </h3>
-                <p className="text-sm text-muted-foreground capitalize">{professional.category}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center">
-              <Star className="w-4 h-4 text-yellow-500 mr-1" />
-              <span className="font-medium">{rating.toFixed(1)}</span>
-              <span className="text-muted-foreground text-sm ml-1">({reviewCount})</span>
-            </div>
-          </div>
+        {/* Emergency and Daily Pay indicators */}
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {emergency_available && (
+            <Badge variant="destructive" className="font-normal flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Emergency Service
+            </Badge>
+          )}
           
-          <p className="text-sm text-muted-foreground mb-4">{description}</p>
-          
-          <div className="flex flex-wrap gap-2 mb-4">
-            {(isWithProfile ? professional.specialties : professional.specialties).map((specialty, index) => (
-              <span 
-                key={index}
-                className="px-2 py-1 rounded-full bg-secondary text-xs font-medium"
-              >
-                {specialty}
-              </span>
-            ))}
-          </div>
-          
-          <div className="mt-auto pt-4 border-t border-border/60">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4 mr-1" />
-                {location}
-              </div>
-              
-              <div className="text-right">
-                <div className="font-semibold text-lg">${hourlyRate}/hr</div>
-                <div className="text-xs text-muted-foreground">{availability}</div>
-              </div>
-            </div>
-            
-            <div className="mt-4 space-y-2">
-              {phoneNumber && (
-                <Button 
-                  variant="outline" 
-                  className="w-full flex items-center justify-center"
-                  onClick={handleCall}
-                >
-                  <Phone className="mr-2 w-4 h-4" />
-                  Call Now
-                </Button>
-              )}
-              
-              {hasServices && (
-                <Button 
-                  variant="outline" 
-                  className="w-full flex items-center justify-center"
-                  onClick={() => setShowServices(true)}
-                >
-                  <Briefcase className="mr-2 w-4 h-4" />
-                  View Services
-                </Button>
-              )}
-              
-              <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                View Profile
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </div>
-          </div>
+          {daily_pay_available && (
+            <Badge variant="secondary" className="font-normal flex items-center gap-1">
+              <DollarSign className="h-3 w-3" />
+              Daily Pay
+            </Badge>
+          )}
         </div>
-      </div>
+      </CardContent>
 
-      {/* Services Dialog */}
-      {isWithProfile && professional.services && (
-        <Dialog open={showServices} onOpenChange={setShowServices}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Services Offered by {name}</DialogTitle>
-              <DialogDescription>
-                Browse and book available services
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="py-4">
-              <ProfessionalServices 
-                services={professional.services} 
-                professionalId={professional.id}
-              />
-            </div>
-            
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowServices(false)}
-              >
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-    </motion.div>
+      <CardFooter className="pt-0 flex flex-col sm:flex-row items-stretch gap-2">
+        <Button 
+          asChild 
+          variant="default" 
+          className="w-full sm:flex-1"
+        >
+          <Link to={`/professional/${id}`}>
+            View Profile
+          </Link>
+        </Button>
+        
+        {profile.phone && (
+          <Button 
+            onClick={handleCall} 
+            variant="outline" 
+            className="w-full sm:w-auto flex items-center gap-1"
+          >
+            <Phone className="h-4 w-4" />
+            Call Now
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 

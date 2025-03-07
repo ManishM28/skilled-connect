@@ -4,9 +4,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ProfessionalWithProfile, getTopProfessionals } from '@/services/professionalService';
 import ProfessionalCard from '@/components/ProfessionalCard';
 import { categories } from '@/data/categories';
-import { Loader2, Filter, Phone } from 'lucide-react';
+import { Loader2, Filter, Phone, AlertCircle, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import EmergencySOS from '@/components/EmergencySOS';
 import {
   Select,
   SelectContent,
@@ -23,6 +24,8 @@ const ProfessionalsList = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [priceRange, setPriceRange] = useState<string>('');
   const [showOnlyWithPhone, setShowOnlyWithPhone] = useState(false);
+  const [showEmergencyOnly, setShowEmergencyOnly] = useState(false);
+  const [showDailyPayOnly, setShowDailyPayOnly] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -51,7 +54,7 @@ const ProfessionalsList = () => {
     fetchProfessionals();
   }, [location]);
 
-  // Filter professionals based on search, category, price range, and phone availability
+  // Filter professionals based on search, category, price range, phone availability, emergency, and daily pay
   const filteredProfessionals = professionals.filter(pro => {
     const nameMatch = 
       `${pro.profile.first_name} ${pro.profile.last_name}`
@@ -77,13 +80,18 @@ const ProfessionalsList = () => {
     }
     
     const phoneMatch = showOnlyWithPhone ? !!pro.profile.phone : true;
+    const emergencyMatch = showEmergencyOnly ? !!pro.emergency_available : true;
+    const dailyPayMatch = showDailyPayOnly ? !!pro.daily_pay_available : true;
     
-    return nameMatch && categoryMatch && priceMatch && phoneMatch;
+    return nameMatch && categoryMatch && priceMatch && phoneMatch && emergencyMatch && dailyPayMatch;
   });
 
   return (
     <div className="container py-12">
-      <h1 className="text-3xl font-bold mb-8">Service Providers</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Service Providers</h1>
+        <EmergencySOS />
+      </div>
       
       <div className="mb-8 space-y-4 bg-card p-6 rounded-lg shadow-sm">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -130,14 +138,7 @@ const ProfessionalsList = () => {
           </Select>
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Filter className="w-4 h-4 mr-1" />
-            <span>
-              Showing {filteredProfessionals.length} of {professionals.length} professionals
-            </span>
-          </div>
-          
+        <div className="flex flex-wrap items-center gap-2">
           <Button 
             variant={showOnlyWithPhone ? "default" : "outline"}
             size="sm"
@@ -147,6 +148,35 @@ const ProfessionalsList = () => {
             <Phone className="h-4 w-4" />
             {showOnlyWithPhone ? "Showing call-enabled" : "Show call-enabled only"}
           </Button>
+          
+          <Button 
+            variant={showEmergencyOnly ? "destructive" : "outline"}
+            size="sm"
+            onClick={() => setShowEmergencyOnly(!showEmergencyOnly)}
+            className="flex items-center gap-2"
+          >
+            <AlertCircle className="h-4 w-4" />
+            {showEmergencyOnly ? "Showing emergency services" : "Show emergency services only"}
+          </Button>
+          
+          <Button 
+            variant={showDailyPayOnly ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setShowDailyPayOnly(!showDailyPayOnly)}
+            className="flex items-center gap-2"
+          >
+            <DollarSign className="h-4 w-4" />
+            {showDailyPayOnly ? "Showing daily pay" : "Show daily pay only"}
+          </Button>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Filter className="w-4 h-4 mr-1" />
+            <span>
+              Showing {filteredProfessionals.length} of {professionals.length} professionals
+            </span>
+          </div>
         </div>
       </div>
       
