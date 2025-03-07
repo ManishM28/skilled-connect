@@ -193,6 +193,8 @@ export type Database = {
         Row: {
           availability: string | null
           category: string
+          daily_pay_available: boolean | null
+          emergency_available: boolean | null
           hourly_rate: number | null
           id: string
           specialties: string[] | null
@@ -202,6 +204,8 @@ export type Database = {
         Insert: {
           availability?: string | null
           category: string
+          daily_pay_available?: boolean | null
+          emergency_available?: boolean | null
           hourly_rate?: number | null
           id: string
           specialties?: string[] | null
@@ -211,6 +215,8 @@ export type Database = {
         Update: {
           availability?: string | null
           category?: string
+          daily_pay_available?: boolean | null
+          emergency_available?: boolean | null
           hourly_rate?: number | null
           id?: string
           specialties?: string[] | null
