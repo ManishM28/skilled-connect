@@ -15,6 +15,7 @@ export type ProfessionalWithProfile = {
     avatar_url: string | null;
     location: string | null;
     bio: string | null;
+    phone: string | null;
   };
   avg_rating: number | null;
   review_count: number;
@@ -59,7 +60,7 @@ export async function getFeaturedProfessionals(limit = 3): Promise<ProfessionalW
     .from('professionals')
     .select(`
       *,
-      profile: profiles(first_name, last_name, avatar_url, location, bio),
+      profile: profiles(first_name, last_name, avatar_url, location, bio, phone),
       avg_rating: reviews(rating)
     `)
     .order('years_experience', { ascending: false })
@@ -95,7 +96,7 @@ export async function getProfessionalsByCategory(
     .from('professionals')
     .select(`
       *,
-      profile: profiles(first_name, last_name, avatar_url, location, bio),
+      profile: profiles(first_name, last_name, avatar_url, location, bio, phone),
       avg_rating: reviews(rating)
     `)
     .eq('category', category)
@@ -128,7 +129,7 @@ export async function getTopProfessionals(limit = 20): Promise<ProfessionalWithP
     .from('professionals')
     .select(`
       *,
-      profile: profiles(first_name, last_name, avatar_url, location, bio),
+      profile: profiles(first_name, last_name, avatar_url, location, bio, phone),
       avg_rating: reviews(rating)
     `)
     .order('years_experience', { ascending: false })
