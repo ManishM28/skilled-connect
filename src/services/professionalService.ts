@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export type ProfessionalWithProfile = {
@@ -243,61 +242,6 @@ export async function getDailyPayProfessionals(limit = 10): Promise<Professional
   });
 }
 
-// Comment out emergency SOS functions until the table is created in the database
-// These functions will be implemented once the database schema is updated
-
-/*
-export async function createEmergencySOS(
-  emergencySOS: Omit<EmergencySOS, 'id' | 'created_at' | 'status'>
-): Promise<EmergencySOS | null> {
-  const { data, error } = await supabase
-    .from('emergency_sos')
-    .insert([{ ...emergencySOS, status: 'active' }])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating emergency SOS:', error);
-    return null;
-  }
-
-  return data;
-}
-
-export async function getClientEmergencySOS(clientId: string): Promise<EmergencySOS[]> {
-  const { data, error } = await supabase
-    .from('emergency_sos')
-    .select('*')
-    .eq('client_id', clientId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching client emergency SOS:', error);
-    return [];
-  }
-
-  return data;
-}
-
-export async function updateEmergencySOSStatus(
-  id: string, 
-  status: 'active' | 'resolved' | 'cancelled'
-): Promise<boolean> {
-  const { error } = await supabase
-    .from('emergency_sos')
-    .update({ status })
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error updating emergency SOS status:', error);
-    return false;
-  }
-
-  return true;
-}
-*/
-
-// For now, let's create temporary mock implementations to satisfy the type system
 export async function createEmergencySOS(
   emergencySOS: Omit<EmergencySOS, 'id' | 'created_at' | 'status'>
 ): Promise<EmergencySOS | null> {
