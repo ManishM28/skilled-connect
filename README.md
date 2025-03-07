@@ -10,7 +10,7 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/14ac0dcb-209e-4b61-be5c-78d03e036cac) and start prompting.
+Simply visit the [Lovable Project](https://skilled-connect.lovable.app/) and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
 
