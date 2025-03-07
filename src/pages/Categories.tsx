@@ -8,8 +8,7 @@ import SearchBar from '@/components/SearchBar';
 import ProfessionalCard from '@/components/ProfessionalCard';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import { getProfessionalsByCategory } from '@/services/professionalService';
-import type { ProfessionalWithProfile } from '@/services/professionalService';
+import { getProfessionalsByCategory, ProfessionalWithProfile } from '@/services/professionalService';
 
 const CategoriesPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -99,30 +98,12 @@ const CategoriesPage = () => {
               </div>
             ) : professionals.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {professionals.map(pro => {
-                  // Convert from database model to UI model
-                  const uiProfessional = {
-                    id: pro.id,
-                    name: `${pro.profile.first_name || ''} ${pro.profile.last_name || ''}`.trim(),
-                    profileImage: pro.profile.avatar_url || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80',
-                    category: pro.category,
-                    rating: pro.avg_rating || 0,
-                    reviewCount: pro.review_count || 0,
-                    hourlyRate: Number(pro.hourly_rate) || 0,
-                    description: pro.profile.bio || '',
-                    location: pro.profile.location || 'Location not specified',
-                    verificationBadge: pro.verification_badge,
-                    specialties: pro.specialties || [],
-                    availability: pro.availability || 'Availability not specified',
-                  };
-                  
-                  return (
-                    <ProfessionalCard 
-                      key={pro.id} 
-                      professional={uiProfessional} 
-                    />
-                  );
-                })}
+                {professionals.map(pro => (
+                  <ProfessionalCard 
+                    key={pro.id} 
+                    professional={pro} 
+                  />
+                ))}
               </div>
             ) : (
               <div className="text-center py-12">
