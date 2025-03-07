@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import CategorySection from '@/components/CategorySection';
@@ -6,8 +6,10 @@ import FeaturedProfessionals from '@/components/FeaturedProfessionals';
 import Footer from '@/components/Footer';
 import Map from '@/components/Map';
 import EmergencySOS from '@/components/EmergencySOS';
-import { ArrowDown, ShieldCheck, Zap, MessageSquare, Medal, MapPin } from 'lucide-react';
+import { ArrowDown, ShieldCheck, Zap, MessageSquare, Medal, MapPin, Phone, PhoneCall } from 'lucide-react';
 import { motion, useScroll, useSpring } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import Chatbot from '@/components/Chatbot';
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -16,6 +18,7 @@ const Index = () => {
     damping: 30,
     restDelta: 0.001
   });
+  const [showChatbot, setShowChatbot] = useState(false);
 
   useEffect(() => {
     const handleAnchorClick = (e: MouseEvent) => {
@@ -65,10 +68,82 @@ const Index = () => {
       
       <Footer />
       
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed right-6 z-40 flex flex-col gap-4 bottom-6">
+        <QuickCallButton />
+        <Button 
+          onClick={() => setShowChatbot(!showChatbot)} 
+          className="rounded-full h-14 w-14 shadow-lg flex items-center justify-center"
+          variant={showChatbot ? "secondary" : "default"}
+        >
+          <MessageSquare size={22} />
+        </Button>
         <EmergencySOS />
       </div>
+      
+      {showChatbot && (
+        <div className="fixed right-6 bottom-24 z-40">
+          <Chatbot />
+        </div>
+      )}
     </div>
+  );
+};
+
+const QuickCallButton = () => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  
+  const handleCall = (number: string) => {
+    window.location.href = `tel:${number}`;
+    setShowDropdown(false);
+  };
+  
+  return (
+    <div className="relative">
+      <Button 
+        onClick={() => setShowDropdown(!showDropdown)}
+        className="rounded-full h-14 w-14 shadow-lg bg-green-500 hover:bg-green-600 flex items-center justify-center"
+      >
+        <PhoneCall size={22} />
+      </Button>
+      
+      {showDropdown && (
+        <div className="absolute bottom-16 right-0 bg-card shadow-lg rounded-lg p-3 w-64 border border-border">
+          <h4 className="font-medium mb-2 text-sm">Quick Call Professionals</h4>
+          <div className="space-y-2">
+            <QuickCallItem
+              name="Emergency Plumber"
+              number="123-456-7890"
+              onClick={() => handleCall('1234567890')}
+            />
+            <QuickCallItem
+              name="24/7 Electrician"
+              number="098-765-4321"
+              onClick={() => handleCall('0987654321')}
+            />
+            <QuickCallItem
+              name="Home Repair Services"
+              number="555-123-4567"
+              onClick={() => handleCall('5551234567')}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const QuickCallItem = ({ name, number, onClick }: { name: string; number: string; onClick: () => void }) => {
+  return (
+    <button 
+      className="flex items-center justify-between w-full p-2 rounded-md hover:bg-accent text-left"
+      onClick={onClick}
+    >
+      <div>
+        <div className="font-medium text-sm">{name}</div>
+        <div className="text-xs text-muted-foreground">{number}</div>
+      </div>
+      <Phone size={16} className="text-green-500" />
+    </button>
   );
 };
 
@@ -258,12 +333,22 @@ const CallToActionSection = () => {
 };
 
 const LocationMapSection = () => {
+  const [showProfessionals, setShowProfessionals] = useState(true);
+  
+  const professionalLocations = [
+    { id: '1', name: 'John Plumber', location: 'Downtown', lat: 40.712776, lng: -74.005974 },
+    { id: '2', name: 'Mary Electrician', location: 'Brooklyn', lat: 40.650002, lng: -73.949997 },
+    { id: '3', name: 'Kevin Carpenter', location: 'Queens', lat: 40.742054, lng: -73.769417 },
+    { id: '4', name: 'Sarah Painter', location: 'Bronx', lat: 40.837048, lng: -73.865433 },
+    { id: '5', name: 'Michael HVAC', location: 'Manhattan', lat: 40.758896, lng: -73.985130 },
+  ];
+
   return (
     <section id="locations" className="py-24 bg-background relative overflow-hidden">
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/10 rounded-full blur-3xl opacity-30 -z-10" />
       
       <div className="container px-6 md:px-10 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
             Find Professionals Near You
           </h2>
@@ -271,10 +356,32 @@ const LocationMapSection = () => {
             Discover skilled workers in your area ready to help with your projects
           </p>
         </div>
+        
+        <div className="flex justify-center mb-8">
+          <div className="bg-secondary/30 p-1 rounded-full">
+            <Button
+              variant={showProfessionals ? "default" : "ghost"}
+              className="rounded-full"
+              onClick={() => setShowProfessionals(true)}
+            >
+              Show Professionals
+            </Button>
+            <Button
+              variant={!showProfessionals ? "default" : "ghost"}
+              className="rounded-full"
+              onClick={() => setShowProfessionals(false)}
+            >
+              Show Services
+            </Button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
           <div className="lg:col-span-2">
-            <Map />
+            <Map 
+              professionalLocations={showProfessionals ? professionalLocations : []} 
+              className="h-[500px]"
+            />
           </div>
           
           <div className="space-y-6">
@@ -301,9 +408,9 @@ const LocationMapSection = () => {
                 </li>
                 <li className="flex items-start">
                   <span className="bg-primary/20 p-1 rounded-full mr-2 mt-0.5">
-                    <MessageSquare className="h-4 w-4 text-primary" />
+                    <Phone className="h-4 w-4 text-primary" />
                   </span>
-                  <span className="text-sm">Contact professionals directly</span>
+                  <span className="text-sm">Call professionals directly from the app</span>
                 </li>
               </ul>
             </div>
@@ -315,10 +422,41 @@ const LocationMapSection = () => {
               <p className="mb-4">
                 Need immediate assistance? Use our Emergency SOS feature to connect with available professionals right away.
               </p>
-              <EmergencySOS />
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="destructive" className="w-full flex items-center gap-2">
+                  <PhoneCall className="h-4 w-4" />
+                  Call Emergency
+                </Button>
+                <Button variant="outline" className="w-full">View Providers</Button>
+              </div>
             </div>
           </div>
         </div>
+        
+        {showProfessionals && (
+          <div className="mt-12">
+            <h3 className="text-2xl font-display font-semibold mb-6 text-center">
+              Nearby Professional Services
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {professionalLocations.map(pro => (
+                <div key={pro.id} className="bg-card border border-border/40 p-4 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">{pro.name}</h4>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                        <MapPin className="h-3 w-3" /> {pro.location}
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" className="h-8 gap-1">
+                      <Phone className="h-3 w-3" /> Call
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
